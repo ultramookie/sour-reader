@@ -47,7 +47,7 @@ while($row = mysql_fetch_array($status))
 			$title = $result->title;
 			$description = $result->summary;
 			$pubDate = $result->updated;
-			$link = $result->link;
+			$link = $result->link['href'];
 			$guid = $result->id;
 			$content = $result->content;
 			addEntry($title,$description,$pubDate,$link,$guid,$id);

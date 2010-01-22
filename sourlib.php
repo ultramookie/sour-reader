@@ -24,64 +24,52 @@ function showUpdateForm() {
         echo "</form>";
 }
 
-function showRecent() {
-	$numResults = 10;
-	$urlLen = 60;
 
-	$query = "select id, url from main order by creation desc limit $numResults";
-	$status = mysql_query($query);
-	$query = "select id, url, count from main order by count desc limit $numResults";
-	$countresult = mysql_query($query);
-	$query = "select id, url from main order by accessed desc limit $numResults";
-	$accessresult = mysql_query($query);
-	$query = "select id from main order by creation desc limit 1";
-	$randresult = mysql_query($query);
+function showFeedsFrontPage() {
 
+        $query = "select catid, catname from categories order by catname";
+        $result = mysql_query($query);
+
+        while ($row = mysql_fetch_array($result)) {
+		$catname=$row['catname'];
+		$catid=$row['catid'];
+
+		print "<b>$catname</b>";
+		print "<ul>";
+        	$query = "select feedid, feedname from feeds where feedcat='$catid' order by feedname;";
+        	$feedresult = mysql_query($query);
+
+		while ($feedrow = mysql_fetch_array($feedresult)) {
+			$feedid = $feedrow['feedid'];
+			$feedname = $feedrow['feedname'];
+
+        		$query = "select count(*) from main where status='N' and feedid='$feedid';";
+        		$indfeedresult = mysql_query($query);
+		
+			$indfeedrow = mysql_fetch_array($indfeedresult)	;
 	
-	$numrows = mysql_num_rows($status);
+			$feedcount = $indfeedrow['count(*)'];
 
-	if ($numrows == 0) {
-		print "no links yet!";
-	} else {
-		$siteurl = getSiteUrl();
-
-		print "<b>random mooshu'd link:</b>";
-       		$randrow = mysql_fetch_array($randresult);
-		$randurlid = rand(1,$randrow['id']);
-		$shortenedID = shortenUrlID($randurlid);
-		print "<ul>";
-		print "<li><b><a href=\"$siteurl/$shortenedID\">$siteurl/$shortenedID</a></b></li>";
-		print "</ul>";
-
-		print "<b>recently mooshu'd links:</b>";
-		print "<ul>";
-        	while ($row = mysql_fetch_array($status)) {
-			$shortenedID = shortenUrlID($row['id']);
-			$url = $row['url'];
-			$suburl = substr($row['url'],0,$urlLen);
-			print "<li><b><a href=\"$siteurl/$shortenedID\">$siteurl/$shortenedID</a></b>: <a href=\"$url\" rel=\"nofollow\">$suburl...</a></li>";
+			if ($feedcount > 0) {
+				print "<li><a href=\"showfeed.php?feedid=$feedid\">$feedname</a> (<b>$feedcount</b>)</li>";
+			}
 		}
 		print "</ul>";
-		print "<b>most accessed mooshu'd links:</b>";
-		print "<ul>";
-        	while ($row = mysql_fetch_array($countresult)) {
-			$shortenedID = shortenUrlID($row['id']);
-			$url = $row['url'];
-			$suburl = substr($row['url'],0,$urlLen);
-			$count = $row['count'];
-			print "<li><b><a href=\"$siteurl/$shortenedID\">$siteurl/$shortenedID</a></b> ($count): <a href=\"$url\" rel=\"nofollow\">$suburl...</a></li>";
-		}
-		print "</ul>";
-		print "<b>recently accessed mooshu'd links:</b>";
-		print "<ul>";
-        	while ($row = mysql_fetch_array($accessresult)) {
-			$shortenedID = shortenUrlID($row['id']);
-			$url = $row['url'];
-			$suburl = substr($row['url'],0,$urlLen);
-			$count = $row['count'];
-			print "<li><b><a href=\"$siteurl/$shortenedID\">$siteurl/$shortenedID</a></b>: <a href=\"$url\" rel=\"nofollow\">$suburl...</a></li>";
-		}
-		print "</ul>";
+        }
+}
+
+function showFeed($feedid) {
+
+        $query = "select id, title, date_format(pubDate, '%r') as time, date_format(pubDate, '%m/%d/%y') as date from main where feedid='$feedid' and status='N' order by pubDate DESC";
+        $result = mysql_query($query);
+
+        while ($row = mysql_fetch_array($result)) {
+		$id=$row['id'];
+		$title=$row['title'];
+		$time=$row['time'];
+		$date=$row['date'];
+
+		print "<a href=\"showentry.php?id=$id\">$title</a> - $time ($date)<br />";
         }
 }
 
@@ -98,7 +86,7 @@ function addEntry($title,$description,$pubDate,$link,$guid,$feed) {
 	} else {
 		$timestamp = strtotime($pubDate);
 		$mypubDate = date('YmdHis',$timestamp);
-		$query = "insert into main (title, description, pubDate, link, guid, feedid) values ('$title', '$description', '$mypubDate', '$link', '$guid', '$feed')";
+		$query = "insert into main (title, description, pubDate, link, guid, feedid, status) values ('$title', '$description', '$mypubDate', '$link', '$guid', '$feed', 'N')";
 		$result = mysql_query($query);
 		print "adding entry $title (from $feed) <br />";
 	}
@@ -347,6 +335,30 @@ function changePass($user,$pass) {
 	echo "password has been updated!";
 }
 
+function markEntryRead($id) {
+
+	$query = "update main set status='R' where id='$id'";
+	$result = mysql_query($query);
+}
+
+function showEntry($id) {
+
+        $query = "select title, date_format(pubDate, '%r') as time, date_format(pubDate, '%m/%d/%y') as date, link, description from main where id='$id'";
+	$result = mysql_query($query);
+        
+	$row = mysql_fetch_array($result);
+	$title = $row['title'];
+	$time = $row['time'];
+	$date = $row['date'];
+	$link = $row['link'];
+	$description = $row['description'];
+
+	echo "<h3><a href=\"$link\">$title</a></h3>";
+	echo "$time ($date)<br /><br />";
+	echo "$description";
+
+}	
+
 function deleteCat($catid) {
 
 	$query = "update feeds set feedcat='1' where feedcat='$catid'";
@@ -379,6 +391,7 @@ function showEditCatform($catid) {
 
 function changeCatName($catid,$catname) {
 
+	$catid = mysql_real_escape_string($catid);
 	$catname = mysql_real_escape_string($catname);
 
 	$query = "update categories set catname='$catname' where catid='$catid'";
@@ -447,7 +460,7 @@ function addUser($user,$email,$pass) {
 		$query = "create table user ( name varchar(30) NOT NULL, email varchar(30) NOT NULL, pass varchar(30) NOT NULL, secret varchar(6), cookie varchar(300) )";
 		$status = mysql_query($query);
 
-		$query = "create table main ( id int NOT NULL AUTO_INCREMENT, entrytime DATETIME NOT NULL, title varchar(1024) NOT NULL, description varchar(50000), pubDate varchar(1024), link varchar(1024) NOT NULL, guid varchar(1024) NOT NULL, status varchar(2), feedid int NOT NULL, PRIMARY KEY (id)); ";
+		$query = "create table main ( id int NOT NULL AUTO_INCREMENT, title varchar(1024) NOT NULL, description varchar(50000), pubDate DATETIME NOT NULL, link varchar(1024) NOT NULL, guid varchar(1024) NOT NULL, status varchar(2), feedid int NOT NULL, PRIMARY KEY (id)); ";
 		$status = mysql_query($query);
 		
 		$query = "create table feeds ( feedid int NOT NULL AUTO_INCREMENT, feedname varchar(1024) NOT NULL, feedurl varchar(1024) NOT NULL, feedcat int NOT NULL, PRIMARY KEY(feedid) ); ";

@@ -6,6 +6,7 @@ include_once("sourlib.php");
 
 $catid = $_GET['catid'];
 
+$catid = mysql_real_escape_string($catid);
 if (checkCookie()) {
 	deleteCat($catid);
 } else {
