@@ -283,15 +283,17 @@ function showFeedsform() {
 }
 
 function showCatform() {
-	echo "<p><b>add a category:</b></p>";
-	echo "<form action=\"";
-	echo $_SERVER['PHP_SELF'];
-	echo "\"";
-	echo " method=\"post\">";
-	echo "category name: <input type=\"text\" name=\"cat\" \"><br />";
-	echo "<input type=\"hidden\" name=\"checksubmit\" value=\"1\">";
-	echo "<input type=\"submit\" name=\"submit\" value=\"update\">";
-	echo "</form>";
+
+	echo "<ul>";
+	$query = "select catid,catname from categories order by catname";
+        $status = mysql_query($query);
+
+       	while ($row = mysql_fetch_array($status)) {
+		$catname = $row['catname'];
+		$catid = $row['catid'];
+		print "<li><b>$catname</b> [<a href=\"deletecat.php?catid=$catid\">d</a>][<a href=\"editcat.php?catid=$catid\">e</a>]</li>";
+	}
+	echo "</ul>";
 }
 
 function showForgotform() {
@@ -345,6 +347,46 @@ function changePass($user,$pass) {
 	echo "password has been updated!";
 }
 
+function deleteCat($catid) {
+
+	$query = "update feeds set feedcat='1' where feedcat='$catid'";
+	$result = mysql_query($query);
+
+	$query = "delete from categories where catid='$catid'";
+	$result = mysql_query($query);
+
+	echo "category deleted.";
+}
+
+function showEditCatform($catid) {
+
+	$query = "select catname from categories where catid='$catid'";
+	$result = mysql_query($query);
+	$row = mysql_fetch_array($result);
+
+	$catname = $row['catname'];
+
+	echo "<form action=\"";
+	echo $_SERVER['PHP_SELF'];
+	echo "\"";
+	echo " method=\"post\">";
+	echo "category name: <input type=\"text\" name=\"catname\" value=\"" . $catname . "\"><br />";
+	echo "<input type=\"hidden\" name=\"catidp\" value=\"" . $catid ."\">";
+	echo "<input type=\"hidden\" name=\"checksubmit\" value=\"1\">";
+	echo "<input type=\"submit\" name=\"submit\" value=\"change\">";
+	echo "</form>";
+}
+
+function changeCatName($catid,$catname) {
+
+	$catname = mysql_real_escape_string($catname);
+
+	$query = "update categories set catname='$catname' where catid='$catid'";
+	$result = mysql_query($query);
+
+	echo "category name changed to $catname!";
+}
+
 function changeSettings($site,$url,$numberIndex) {
 
         $site = mysql_real_escape_string($site);
@@ -377,7 +419,7 @@ function addCat($cat) {
 
         $cat = mysql_real_escape_string($cat);
 
-	$query = "select cat from categories where catname='$cat'";
+	$query = "select catid from categories where catname='$cat'";
 	$status = mysql_query($query);
 	if (mysql_num_rows($status) >= 1) {
 		echo "already have a category named $cat!";
