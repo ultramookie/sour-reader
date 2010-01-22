@@ -282,6 +282,18 @@ function showFeedsform() {
 	echo "</form>";
 }
 
+function showCatform() {
+	echo "<p><b>add a category:</b></p>";
+	echo "<form action=\"";
+	echo $_SERVER['PHP_SELF'];
+	echo "\"";
+	echo " method=\"post\">";
+	echo "category name: <input type=\"text\" name=\"cat\" \"><br />";
+	echo "<input type=\"hidden\" name=\"checksubmit\" value=\"1\">";
+	echo "<input type=\"submit\" name=\"submit\" value=\"update\">";
+	echo "</form>";
+}
+
 function showForgotform() {
         echo "Please enter the following information to reset your password: <br />";
         echo "<form action=\"";
@@ -356,9 +368,23 @@ function addFeed($site,$url) {
 		echo "already subscribed to $url!";
 	} else {
 		$query = "insert into feeds (feedname,feedurl,feedcat) values ('$site', '$url', '1')";
-		print "$query<br />";
 		$result = mysql_query($query);
 		echo "$site has been added!";
+	}
+}
+
+function addCat($cat) {
+
+        $cat = mysql_real_escape_string($cat);
+
+	$query = "select cat from categories where catname='$cat'";
+	$status = mysql_query($query);
+	if (mysql_num_rows($status) >= 1) {
+		echo "already have a category named $cat!";
+	} else {
+		$query = "insert into categories (catname) values ('$cat')";
+		$result = mysql_query($query);
+		echo "$cat has been added!";
 	}
 }
 
