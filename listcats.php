@@ -7,6 +7,8 @@
 include_once("db.php");
 include_once("sourlib.php");
 
+echo "<a href=\"addcat.php\">add category</a>";
+
 if (checkCookie()) {
 	showCatform();
 } else {

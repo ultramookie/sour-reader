@@ -27,6 +27,13 @@ function showUpdateForm() {
 
 function showFeedsFrontPage() {
 
+	$query = "select count(*) from main where status='N';";
+        $result = mysql_query($query);
+	$row = mysql_fetch_array($result);
+	$count = $row['count(*)'];
+
+	echo "<a href=\"showfeed.php?feedid=all\"><b>all new ($count)</b></a><br />";
+
         $query = "select catid, catname from categories order by catname";
         $result = mysql_query($query);
 
@@ -34,8 +41,8 @@ function showFeedsFrontPage() {
 		$catname=$row['catname'];
 		$catid=$row['catid'];
 
-		print "<b>$catname</b>";
-		print "<ul>";
+		echo "<b>$catname</b>";
+		echo "<ul>";
         	$query = "select feedid, feedname from feeds where feedcat='$catid' order by feedname;";
         	$feedresult = mysql_query($query);
 
@@ -51,16 +58,20 @@ function showFeedsFrontPage() {
 			$feedcount = $indfeedrow['count(*)'];
 
 			if ($feedcount > 0) {
-				print "<li><a href=\"showfeed.php?feedid=$feedid\">$feedname</a> (<b>$feedcount</b>)</li>";
+				echo "<li><a href=\"showfeed.php?feedid=$feedid\">$feedname</a> (<b>$feedcount</b>)</li>";
 			}
 		}
-		print "</ul>";
+		echo "</ul>";
         }
 }
 
 function showFeed($feedid) {
 
-        $query = "select id, title, date_format(pubDate, '%r') as time, date_format(pubDate, '%m/%d/%y') as date from main where feedid='$feedid' and status='N' order by pubDate DESC";
+	if ( preg_match("/^all$/",$feedid) ) {
+        	$query = "select id, title, date_format(pubDate, '%r') as time, date_format(pubDate, '%m/%d/%y') as date from main where status='N' order by pubDate DESC";
+	} else {
+        	$query = "select id, title, date_format(pubDate, '%r') as time, date_format(pubDate, '%m/%d/%y') as date from main where feedid='$feedid' and status='N' order by pubDate DESC";
+	}
         $result = mysql_query($query);
 
         while ($row = mysql_fetch_array($result)) {
@@ -251,7 +262,7 @@ function showSettingsform() {
 	echo " method=\"post\">";
         echo "user: <input type=\"text\" name=\"user\"><br />";
         echo "pass: <input type=\"password\" name=\"pass\"><br />";
-	echo "add category: <input type=\"text\" name=\"category\" \"><br />";
+	echo "purge after: <input type=\"text\" name=\"purge\" \"> days<br />";
 	echo "<input type=\"hidden\" name=\"checksubmit\" value=\"1\">";
 	echo "<input type=\"submit\" name=\"submit\" value=\"update\">";
 	echo "</form>";
@@ -370,6 +381,18 @@ function deleteCat($catid) {
 	echo "category deleted.";
 }
 
+function showCatAddform() {
+	echo "<p><b>add a category:</b></p>";
+	echo "<form action=\"";
+	echo $_SERVER['PHP_SELF'];
+	echo "\"";
+	echo " method=\"post\">";
+	echo "category name: <input type=\"text\" name=\"cat\" \"><br />";
+	echo "<input type=\"hidden\" name=\"checksubmit\" value=\"1\">";
+	echo "<input type=\"submit\" name=\"submit\" value=\"update\">";
+	echo "</form>";
+}
+
 function showEditCatform($catid) {
 
 	$query = "select catname from categories where catid='$catid'";
@@ -389,6 +412,45 @@ function showEditCatform($catid) {
 	echo "</form>";
 }
 
+function showFeedEditform($feedid) {
+
+	$query = "select feedname, feedurl, feedcat from feeds where feedid='$feedid'";
+	$result = mysql_query($query);
+	$row = mysql_fetch_array($result);
+
+	$feedname = $row['feedname'];
+	$feedurl = $row['feedurl'];
+	$feedcat = $row['feedcat'];
+	$catname = $row['categories.catname'];
+
+	$query = "select catid, catname from categories order by catname";
+	$result = mysql_query($query);
+
+	echo "<form action=\"";
+	echo $_SERVER['PHP_SELF'];
+	echo "\"";
+	echo " method=\"post\">";
+	echo "feed name: <input type=\"text\" name=\"feedname\" value=\"" . $feedname . "\"><br />";
+	echo "feed url: <input type=\"text\" name=\"feedurl\" value=\"" . $feedurl . "\"><br />";
+	echo "feed category: <select name=\"catid\">";
+       	while ($row = mysql_fetch_array($result)) {
+		$catname = $row['catname'];
+		$catid = $row['catid'];
+
+		if ($feedcat == $catid) {
+			$selected = " selected ";
+		} else {
+			$selected = " ";
+		}
+		echo "<option value=\"$catid\" $selected>$catname</option>";
+	}
+	echo "</select>";
+	echo "<input type=\"hidden\" name=\"feedidp\" value=\"$feedid\">";
+	echo "<input type=\"hidden\" name=\"checksubmit\" value=\"1\">";
+	echo "<input type=\"submit\" name=\"submit\" value=\"change\">";
+	echo "</form>";
+}
+
 function changeCatName($catid,$catname) {
 
 	$catid = mysql_real_escape_string($catid);
@@ -398,6 +460,30 @@ function changeCatName($catid,$catname) {
 	$result = mysql_query($query);
 
 	echo "category name changed to $catname!";
+}
+
+function changeFeed($feedidp,$feedname,$feedurl,$catid) {
+
+	$feedidp = mysql_real_escape_string($feedidp);
+	$feedname = mysql_real_escape_string($feedname);
+	$feedurl = mysql_real_escape_string($feedurl);
+	$catid = mysql_real_escape_string($catid);
+
+	$query = "update feeds set feedname='$feedname', feedurl='$feedurl', feedcat='$catid' where feedid='$feedidp'";
+	$result = mysql_query($query);
+
+	echo "$feedname updated!";
+}
+
+function markFeedRead($feedid) {
+
+	if ( preg_match("/^all$/",$feedid) ) {
+		$query = "update main set status='R' where status='N'";
+	} else {
+		$query = "update main set status='R' where feedid='$feedid' and status='N'";
+	}
+	$result = mysql_query($query);
+
 }
 
 function changeSettings($site,$url,$numberIndex) {

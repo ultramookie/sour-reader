@@ -20,7 +20,7 @@ if (!(stripslashes($_POST['checksubmit']))) {
 	showLoginform();
 } else {
 	if ($logincheck == 0) {
-		echo "thanks for logging in $user!<br /><b>return to <a href='$siteurl'>$sitename</a></b>.";
+		echo "thanks for logging in $user!<br /><b>start <a href=\"index.php\">reading</a>!</b>.";
 	} else {
 		echo "login failed.  try again.";
 	}
