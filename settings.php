@@ -5,15 +5,13 @@
 <?php
 
 include_once("db.php");
-include_once("mooshulib.php");
+include_once("sourlib.php");
 
 if ((stripslashes(!$_POST['checksubmit'])) && (checkCookie()) ) {
 	showSettingsform();
 } else if (checkCookie()) {
 
 	$username = getUserName();
-	$site = strip_tags($_POST['site']);
-	$url = stripslashes($_POST['url']);
         $user = $username;
         $pass  = stripslashes($_POST['pass']);
 

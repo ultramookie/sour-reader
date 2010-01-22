@@ -1,10 +1,10 @@
 <?php 
 include_once("db.php");
-include_once("mooshulib.php");
+include_once("sourlib.php");
 ?>
 <html>
 <head>
-<title><? echo "$sitename"; ?> </title>
+<title>sour reader</title>
 <style type="text/css">
     body {
 	font-size: small;
@@ -14,7 +14,6 @@ include_once("mooshulib.php");
 </style>
 </head>
 <body>
-<h2><b><a href="<? echo "$siteurl"; ?>"><? echo "$sitename"; ?></a></b></h2>
 <?php
 	if(checkCookie()) {
 		$username = getUserName();

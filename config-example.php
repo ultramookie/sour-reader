@@ -4,7 +4,7 @@
 	$dbhost = "127.0.0.1";
 
 	# the name of your database
-	$db     = "mooshu";
+	$db     = "sour";
 
 	# the username to log into the database
 	$dbuser = "username";
