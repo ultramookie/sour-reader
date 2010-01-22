@@ -108,29 +108,6 @@ function addEntry($url) {
 		
 }
 
-function shortenUrlID($id) {
-	$shortID = base_convert($id,10,36);
-	return($shortID);
-}
-
-function expandUrl($id) {
-	$realid = base_convert($id,36,10);
-	$query = "select id,url,count from main where id='$realid'";
-        $status = mysql_query($query);
-	$numrows = mysql_num_rows($status);
-	if ($numrows == 0) {
-		$url = 0;
-	} else {
-		$row = mysql_fetch_array($status);
-		$url = $row['url'];
-		$count = $row['count'];
-		$count++;
-		$query = "update main set count='$count', accessed=NOW() where id='$realid'";
-        	$status = mysql_query($query);
-	}
-	return($url);
-}
-
 function showLoginForm() {
 	echo "<form action=\"";
 	echo $_SERVER['PHP_SELF'];
@@ -276,8 +253,6 @@ function showAddform() {
 	echo "email: <input type=\"text\" name=\"email\"><br />";
 	echo "password: <input type=\"password\" name=\"pass1\"><br />";
 	echo "password (again): <input type=\"password\" name=\"pass2\"><br />";
-	echo "name of site: <input type=\"text\" name=\"site\"><br />";
-	echo "base url (without http://): <input type=\"text\" name=\"url\"><br />";
 	echo "<input type=\"hidden\" name=\"checksubmit\" value=\"1\">";
 	echo "<input type=\"submit\" name=\"submit\" value=\"install\">";
 	echo "</form>";
@@ -294,8 +269,7 @@ function showSettingsform() {
 	echo " method=\"post\">";
         echo "user: <input type=\"text\" name=\"user\"><br />";
         echo "pass: <input type=\"password\" name=\"pass\"><br />";
-	echo "name of site: <input type=\"text\" name=\"site\" value=\"" . $sitename . "\"><br />";
-	echo "base url (without http://): <input type=\"text\" name=\"url\" value=\"" . $rawsiteurl . "\"><br />";
+	echo "add category: <input type=\"text\" name=\"category\" \"><br />";
 	echo "<input type=\"hidden\" name=\"checksubmit\" value=\"1\">";
 	echo "<input type=\"submit\" name=\"submit\" value=\"update\">";
 	echo "</form>";
@@ -366,7 +340,7 @@ function changeSettings($site,$url,$numberIndex) {
 
 }
 
-function addUser($user,$email,$pass,$site,$url) {
+function addUser($user,$email,$pass) {
         $salt = substr("$email",0,2);
         $epass = crypt($pass,$salt);
 
@@ -379,16 +353,17 @@ function addUser($user,$email,$pass,$site,$url) {
 		$user = mysql_real_escape_string($user);
 		$email = mysql_real_escape_string($email);
 		$pass = mysql_real_escape_string($pass);
-		$site = mysql_real_escape_string($site);
-		$url = mysql_real_escape_string($url);
 		
 		$query = "create table user ( name varchar(30) NOT NULL, email varchar(30) NOT NULL, pass varchar(30) NOT NULL, secret varchar(6), cookie varchar(300) )";
 		$status = mysql_query($query);
 
-		$query = "create table main ( id int NOT NULL AUTO_INCREMENT, creation DATETIME NOT NULL, url varchar(1024) NOT NULL, count int NOT NULL, accessed DATETIME NOT NULL, PRIMARY KEY (id)); ";
+		$query = "create table main ( id int NOT NULL AUTO_INCREMENT, entrytime DATETIME NOT NULL, title varchar(1024) NOT NULL, description varchar(50000), pubDate varchar(1024), link varchar(1024) NOT NULL, guid varchar(1024) NOT NULL, status varchar(2), feedid int NOT NULL, PRIMARY KEY (id)); ";
 		$status = mysql_query($query);
 		
-		$query = "create table site ( name varchar(160) NOT NULL, url varchar(160) NOT NULL ); ";
+		$query = "create table feeds ( feedid int NOT NULL AUTO_INCREMENT, feedname varchar(1024) NOT NULL ); ";
+		$status = mysql_query($query);
+		
+		$query = "create table categories ( catid int NOT NULL AUTO_INCREMENT, catname varchar(1024) NOT NULL ); ";
 		$status = mysql_query($query);
 	
 		$secret = generateCode();
@@ -396,9 +371,6 @@ function addUser($user,$email,$pass,$site,$url) {
 		$query = "insert into user (name,email,pass,secret) values ('$user','$email','$epass','$secret')";
 		$status = mysql_query($query);
 	
-		$query = "insert into site (name,url) values ('$site','$url')";
-		$status = mysql_query($query);
-
 		echo "sour reader installed!  thanks!";
 	}
 }
@@ -411,7 +383,7 @@ function sendRandomPass($email,$func) {
 	$email = mysql_real_escape_string($email);
 	
 	$to = "$email";
-	$from = "From: webmaster@ultramookie.com";
+	$from = "From: enter@something.here.or.else.tld";
 	$subject = "password";
 	$body = "hi, your password is $pass. please login using your email address and the password.  feel free to change your password at anytime.";
 	if (mail($to, $subject, $body, $from)) {
