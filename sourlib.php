@@ -84,28 +84,25 @@ function showRecent() {
 		print "</ul>";
         }
 }
-function addEntry($url) {
-	$url = mysql_real_escape_string($url);
 
-	$query = "select id from main where url='$url'";
+function addEntry($title,$description,$pubDate,$link,$guid,$feed) {
+	$title = mysql_real_escape_string($title);
+	$description = mysql_real_escape_string($description);
+	$link = mysql_real_escape_string($link);
+	$guid = mysql_real_escape_string($guid);
+
+	$query = "select guid,feedid from main where guid='$guid' and feedid='$feed'";
 	$status = mysql_query($query);
-
-	$numrows = mysql_num_rows($status);
-
-	if ($numrows == 0) {
-		$query = "insert into main (url,creation,count,accessed) values ('$url',NOW(),'0',NOW())";
-		$status = mysql_query($query);
-		$query = "select id from main where url='$url'";
-		$status = mysql_query($query);
-        	$row = mysql_fetch_array($status);
-		$shortenedID = shortenUrlID($row['id']);
-		return($shortenedID);
+	if (mysql_num_rows($status) >= 1) {
+		echo "already have article $title!<br />";
 	} else {
-        	$row = mysql_fetch_array($status);
-		$shortenedID = shortenUrlID($row['id']);
-		return($shortenedID);
-	} 
-		
+		$timestamp = strtotime($pubDate);
+		$mypubDate = date('YmdHis',$timestamp);
+		$query = "insert into main (title, description, pubDate, link, guid, feedid) values ('$title', '$description', '$mypubDate', '$link', '$guid', '$feed')";
+		$result = mysql_query($query);
+		print "adding entry $title (from $feed) <br />";
+	}
+
 }
 
 function showLoginForm() {
@@ -259,9 +256,6 @@ function showAddform() {
 }
 
 function showSettingsform() {
-	$sitename = getSiteName();
-	$rawsiteurl = getRawSiteUrl();
-	
 	echo "<p><b>general site settings:</b></p>";
 	echo "<form action=\"";
 	echo $_SERVER['PHP_SELF'];
@@ -273,8 +267,19 @@ function showSettingsform() {
 	echo "<input type=\"hidden\" name=\"checksubmit\" value=\"1\">";
 	echo "<input type=\"submit\" name=\"submit\" value=\"update\">";
 	echo "</form>";
+}
 
-
+function showFeedsform() {
+	echo "<p><b>add feed:</b></p>";
+	echo "<form action=\"";
+	echo $_SERVER['PHP_SELF'];
+	echo "\"";
+	echo " method=\"post\">";
+	echo "feed name: <input type=\"text\" name=\"site\" \"><br />";
+	echo "feed url: <input type=\"text\" name=\"url\" \"><br />";
+	echo "<input type=\"hidden\" name=\"checksubmit\" value=\"1\">";
+	echo "<input type=\"submit\" name=\"submit\" value=\"update\">";
+	echo "</form>";
 }
 
 function showForgotform() {
@@ -340,6 +345,23 @@ function changeSettings($site,$url,$numberIndex) {
 
 }
 
+function addFeed($site,$url) {
+
+        $site = mysql_real_escape_string($site);
+        $url = mysql_real_escape_string($url);
+
+	$query = "select url from feeds where url='$url'";
+	$status = mysql_query($query);
+	if (mysql_num_rows($status) >= 1) {
+		echo "already subscribed to $url!";
+	} else {
+		$query = "insert into feeds (feedname,feedurl,feedcat) values ('$site', '$url', '1')";
+		print "$query<br />";
+		$result = mysql_query($query);
+		echo "$site has been added!";
+	}
+}
+
 function addUser($user,$email,$pass) {
         $salt = substr("$email",0,2);
         $epass = crypt($pass,$salt);
@@ -360,12 +382,15 @@ function addUser($user,$email,$pass) {
 		$query = "create table main ( id int NOT NULL AUTO_INCREMENT, entrytime DATETIME NOT NULL, title varchar(1024) NOT NULL, description varchar(50000), pubDate varchar(1024), link varchar(1024) NOT NULL, guid varchar(1024) NOT NULL, status varchar(2), feedid int NOT NULL, PRIMARY KEY (id)); ";
 		$status = mysql_query($query);
 		
-		$query = "create table feeds ( feedid int NOT NULL AUTO_INCREMENT, feedname varchar(1024) NOT NULL ); ";
+		$query = "create table feeds ( feedid int NOT NULL AUTO_INCREMENT, feedname varchar(1024) NOT NULL, feedurl varchar(1024) NOT NULL, feedcat int NOT NULL, PRIMARY KEY(feedid) ); ";
 		$status = mysql_query($query);
 		
-		$query = "create table categories ( catid int NOT NULL AUTO_INCREMENT, catname varchar(1024) NOT NULL ); ";
+		$query = "create table categories ( catid int NOT NULL AUTO_INCREMENT, catname varchar(1024) NOT NULL, PRIMARY KEY(catid)); ";
 		$status = mysql_query($query);
 	
+		$query = "insert into categories (catname) values ('general')";
+		$status = mysql_query($query);
+		
 		$secret = generateCode();
 	
 		$query = "insert into user (name,email,pass,secret) values ('$user','$email','$epass','$secret')";

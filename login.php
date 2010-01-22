@@ -1,6 +1,6 @@
 <?php
 include_once("db.php");
-include_once("mooshulib.php");
+include_once("sourlib.php");
 
 if (stripslashes($_POST['checksubmit'])) {
         $user = stripslashes($_POST['user']);

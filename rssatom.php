@@ -1,21 +1,24 @@
 <?php
+include_once("db.php");
+include_once("sourlib.php");
 
 // For clean errors on xml parsing
 libxml_use_internal_errors(true);
 
-function addEntry($title,$description,$pubDate,$link,$guid,$feed) {
-	print "adding entry $title (from $feed) <br />";
-}
+$ns = array
+(
+        'content' => 'http://purl.org/rss/1.0/modules/content/'
+); 
+$query = "select feedid, feedurl from feeds order by feedid";
+$status = mysql_query($query);
 
-$fh = fopen("/home/ultramookie/images.brokedot.com/list.txt", "r");
-
-while(true)
+while($row = mysql_fetch_array($status))
 {
-	$line = fgets($fh);
-	if($line == null)break;
+	$url = $row['feedurl'];
+	$id = $row['feedid'];
 
         $session = curl_init();
-        curl_setopt ( $session, CURLOPT_URL, $line );
+        curl_setopt ( $session, CURLOPT_URL, $url );
         curl_setopt ( $session, CURLOPT_RETURNTRANSFER, TRUE );
         curl_setopt ( $session, CURLOPT_CONNECTTIMEOUT, 2 );
 	curl_setopt ( $session, CURLOPT_FOLLOWLOCATION, 1);
@@ -25,7 +28,7 @@ while(true)
 	$xml = simplexml_load_string($result, 'SimpleXMLElement', LIBXML_NOCDATA);
       
       	if (!$xml) {
-		print "<hr />$line is not a valid rss or atom feed!<hr />";
+		print "<hr />$url is not a valid rss or atom feed!<hr />";
 	} elseif ($xml->channel->item) {
 		foreach ($xml->channel->item as $result) {
 			$title = $result->title;
@@ -33,7 +36,11 @@ while(true)
 			$pubDate =  $result->pubDate;
 			$link =  $result->link;
 			$guid = $result->guid;
-			addEntry($title,$description,$pubDate,$link,$guid,$line);
+			$content = $result->children($ns['content']);
+			if ($content) {
+				$description = $content;
+			}
+			addEntry($title,$description,$pubDate,$link,$guid,$id);
 		}
 	} elseif ($xml->entry) {
 		foreach ($xml->entry as $result) {
@@ -43,13 +50,12 @@ while(true)
 			$link = $result->link;
 			$guid = $result->id;
 			$content = $result->content;
-			addEntry($title,$description,$pubDate,$link,$guid,$line);
+			addEntry($title,$description,$pubDate,$link,$guid,$id);
 		}
 	} else {
-		print "<hr />$line is not a valid rss or atom feed!<hr />";
+		print "<hr />$url is not a valid rss or atom feed!<hr />";
 	}
 
 
 }
 
-fclose($fh);
