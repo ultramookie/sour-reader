@@ -1,8 +1,38 @@
-S.O.U.R. Reader
+S.O.U.R. Reader (Simple Opensource Ugly RSS Reader)
+Written by Steve "Mookie" Kong
+Licensed under GPL v3.0.
 
 Just me learning about SimpleXML and RSS and Atom.  Maybe even write
 something I'll actually use.
 
-Licensed under GPL v3.0.
+SYSTEM REQUIREMENTS
+        php5 (with simplexml)
+        mysql
 
--Mookie
+INSTALL INSTRUCTIONS
+        copy all files over to wherever you want to host your microblog.
+
+        from that location, move config-example.php to config.php.
+
+        edit config.php and enter the correct mysql database information.
+
+        point your webbrowser to http://<yoursiteurl>/<sourlocation>/install.php
+
+        fill out information.
+
+	you need to add to your crontab two wget calls:
+
+	one to update the database:
+	*/20 * * * * wget -q http://<yoursiteurl>/<sourlocation>/rssatom.php -O /dev/null >/dev/null 2>&1
+
+	one to purge old articles:
+	0 0 * * * wget -q http://<yoursiteurl>/<sourlocation>/purgeold.php -O /dev/null >/dev/null 2>&1
+
+        enjoy.
+
+Have fun.  This is a tool I will keep tweaking and playing with to learn.  So,
+check the github repo for updates:
+
+http://github.com/ultramookie/sour-reader
+
+Use at your own risk :)
