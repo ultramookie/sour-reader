@@ -3,23 +3,23 @@ body {
 	font-family: "Verdana", Sans;
 	color:#000000;
 	background:#FFFFFF; 
-	width: 550px;
+	width: 700px;
 }
 
 .main {
 	margin-left: 10px;
-	width: 575px;
+	width: 680px;
 }
 
 a {
-	color:#FC7901;
+	color:#000000;
 	background:inherit;
 	text-decoration:none;
 }
 
 a:hover {
-	color:#FC7901;
-	background:#FFCC33;
+	color:#000000;
+	background:inherit;
 	text-decoration:none;
 }
 
@@ -43,11 +43,28 @@ hr {
 	color: #c0c0c0;
 }
 
+p {
+	word-wrap: break-word;
+	background:#FFFFFF;
+	padding: 1px 2px;
+	text-align:justify;
+}
+
 .entry {
-	font-size: medium;
+	font-size: small;
 	word-wrap: break-word;
 	background:#F0F0F0;
-	padding: 10px 25px;
+	padding: 1px 2px;
+	text-align:justify;
+}
+
+.entryind {
+	font-size: small;
+	text-indent:50px;
+	word-wrap: break-word;
+	background:#F0F0F0;
+	padding: 1px 2px;
+	text-align:justify;
 }
 
 .timedate {
@@ -60,6 +77,13 @@ hr {
 .menu {
 	background:#BFBFBF;
 	color:#111111;
+	text-align:justify;
+	padding: 5px;
+}
+
+.menusecond {
+	background:#33CCFF;
+	color:#000000;
 	text-align:justify;
 	padding: 5px;
 }
@@ -85,4 +109,29 @@ hr {
 	font-size: medium;
 	font-family: "Verdana", Sans;
 	color: red;
+}
+
+.containerlight {
+	position: relative;
+	height: 40px;
+	background:#F0F0F0;
+}
+
+.containerdark {
+	position: relative;
+	height: 40px;
+	background:#D0D0D0;
+}
+
+.left-element {
+	position: absolute;
+	left: 0;
+	width: 80%;
+}
+
+.right-element {
+	position: absolute;
+	right: 0;
+	width: 20%;
+	text-align: right;
 }

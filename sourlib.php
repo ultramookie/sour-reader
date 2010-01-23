@@ -32,7 +32,8 @@ function showFeedsFrontPage() {
 	$row = mysql_fetch_array($result);
 	$count = $row['count(*)'];
 
-	echo "<a href=\"showfeed.php?feedid=all\"><b>all new ($count)</b></a><br />";
+	echo "<p class=\"entry\"><a href=\"showfeed.php?feedid=all\"><b>all new ($count)</b></a></p>";
+	echo "<p class=\"entry\"><a href=\"showfeed.php?feedid=saved\"><b>saved</b></a></p>";
 
         $query = "select catid, catname from categories order by catname";
         $result = mysql_query($query);
@@ -41,8 +42,7 @@ function showFeedsFrontPage() {
 		$catname=$row['catname'];
 		$catid=$row['catid'];
 
-		echo "<b>$catname</b>";
-		echo "<ul>";
+		echo "<p class=\"entry\"><b>$catname</b></p>";
         	$query = "select feedid, feedname from feeds where feedcat='$catid' order by feedname;";
         	$feedresult = mysql_query($query);
 
@@ -58,21 +58,30 @@ function showFeedsFrontPage() {
 			$feedcount = $indfeedrow['count(*)'];
 
 			if ($feedcount > 0) {
-				echo "<li><a href=\"showfeed.php?feedid=$feedid\">$feedname</a> (<b>$feedcount</b>)</li>";
+				echo "<p class=\"entryind\"><a href=\"showfeed.php?feedid=$feedid\">$feedname</a> (<b>$feedcount</b>)</p>";
 			}
 		}
-		echo "</ul>";
         }
 }
 
-function showFeed($feedid) {
+function showFeed($feedid,$action = "unread") {
+
+	if (preg_match("/^read$/",$action)) {
+		$pullstatus = " status='N' or status='R' ";
+	} else {
+		$pullstatus = " status='N' ";
+	}
 
 	if ( preg_match("/^all$/",$feedid) ) {
-        	$query = "select id, title, date_format(pubDate, '%r') as time, date_format(pubDate, '%m/%d/%y') as date from main where status='N' order by pubDate DESC";
+        	$query = "select id, title, date_format(pubDate, '%H:%i') as time, date_format(pubDate, '%m%d%y') as date from main where $pullstatus order by pubDate DESC";
+	} elseif ( preg_match("/^saved$/",$feedid) ) {
+        	$query = "select id, title, date_format(pubDate, '%H:%i') as time, date_format(pubDate, '%m%d%y') as date from main where status='S' order by pubDate DESC";
 	} else {
-        	$query = "select id, title, date_format(pubDate, '%r') as time, date_format(pubDate, '%m/%d/%y') as date from main where feedid='$feedid' and status='N' order by pubDate DESC";
+        	$query = "select id, title, date_format(pubDate, '%H:%i') as time, date_format(pubDate, '%m%d%y') as date from main where feedid='$feedid' and ($pullstatus) order by pubDate DESC";
 	}
         $result = mysql_query($query);
+
+	$lightdark="containerlight";
 
         while ($row = mysql_fetch_array($result)) {
 		$id=$row['id'];
@@ -80,7 +89,13 @@ function showFeed($feedid) {
 		$time=$row['time'];
 		$date=$row['date'];
 
-		print "<a href=\"showentry.php?id=$id\">$title</a> - $time<br />";
+		if(preg_match("/^containerlight$/",$lightdark)) {
+			$lightdark="containerdark";
+		} else {
+			$lightdark="containerlight";
+		}
+
+		print "<div class=\"$lightdark\"><div class=\"left-element\"><a href=\"showentry.php?id=$id\">$title</a></div><div class=\"right-element\">$time &#149; $date</div></div>";
         }
 }
 
@@ -289,10 +304,39 @@ function showCatform() {
 	$query = "select catid,catname from categories order by catname";
         $status = mysql_query($query);
 
+	$lightdark="containerlight";
+
        	while ($row = mysql_fetch_array($status)) {
 		$catname = $row['catname'];
 		$catid = $row['catid'];
-		print "<li><b>$catname</b> [<a href=\"deletecat.php?catid=$catid\">d</a>][<a href=\"editcat.php?catid=$catid\">e</a>]</li>";
+		if(preg_match("/^containerlight$/",$lightdark)) {
+			$lightdark="containerdark";
+		} else {
+			$lightdark="containerlight";
+		}
+		print "<div class=\"$lightdark\"><div class=\"left-element\">$catname</div><div class=\"right-element\">[<a href=\"deletecat.php?catid=$catid\">d</a>][<a href=\"editcat.php?catid=$catid\">e</a>]</div></div>";
+	}
+	echo "</ul>";
+}
+
+function showFeedlist() {
+
+	echo "<ul>";
+	$query = "select feedid, feedname from feeds order by feedname";
+        $status = mysql_query($query);
+
+	$lightdark="containerlight";
+       
+	while ($row = mysql_fetch_array($status)) {
+		$feedname = $row['feedname'];
+		$feedid = $row['feedid'];
+		if(preg_match("/^containerlight$/",$lightdark)) {
+			$lightdark="containerdark";
+		} else {
+			$lightdark="containerlight";
+		}
+
+		print "<div class=\"$lightdark\"><div class=\"left-element\">$feedname</div><div class=\"right-element\">[<a href=\"deletefeed.php?feedid=$feedid\">d</a>][<a href=\"editfeed.php?feedid=$feedid\">e</a>]</div></div>";
 	}
 	echo "</ul>";
 }
@@ -378,6 +422,18 @@ function markEntryRead($id) {
 	$result = mysql_query($query);
 }
 
+function markEntryUnread($id) {
+
+	$query = "update main set status='N' where id='$id'";
+	$result = mysql_query($query);
+}
+
+function saveEntry($id) {
+
+	$query = "update main set status='S' where id='$id'";
+	$result = mysql_query($query);
+}
+
 function showEntry($id) {
 
         $query = "select title, date_format(pubDate, '%r') as time, date_format(pubDate, '%m/%d/%y') as date, link, description from main where id='$id'";
@@ -390,9 +446,9 @@ function showEntry($id) {
 	$link = $row['link'];
 	$description = $row['description'];
 
-	echo "<h3><a href=\"$link\" target=\"_new\" >$title</a></h3>";
-	echo "$time ($date)<br /><br />";
-	echo "$description";
+	echo "<h2><a href=\"$link\" target=\"_new\" >$title</a></h2>";
+	echo "<p class=\"timedate\">$time &#149; $date</p>";
+	echo "<p>$description</p>";
 
 }	
 

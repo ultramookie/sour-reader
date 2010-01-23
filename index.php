@@ -9,10 +9,11 @@
 		if ( preg_match("/^markread$/",$action) ) {
 			markFeedRead($feedid);	
 		}
+		showFeedsFrontPage();
+	} else {
+		echo "this is <a href=\"http://github.com/ultramookie/sour-reader\">sour reader</a> written by steve \"<a href=\"http://ultramookie.com\">mookie</a>\" kong</a>";
 	}
 
-	showFeedsFrontPage();
-	
 	include_once("footer.php");
 ?>
 

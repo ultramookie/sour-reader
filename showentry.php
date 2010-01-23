@@ -4,11 +4,20 @@
 	include_once("sourlib.php");
 
 	$id = $_GET['id'];
-
 	$id = mysql_real_escape_string($id);
+	$action = $_GET['action'];
+	$action = mysql_real_escape_string($action);
 
 	if (checkCookie()) {
-		markEntryRead($id);
+		if(preg_match("/^save$/",$action)) {
+			saveEntry($id);
+		} elseif(preg_match("/^unread$/",$action)) {
+			markEntryUnread($id);
+		} else {
+			markEntryRead($id);
+		}
+
+		echo "<p class=\"menusecond\"><a href=\"showentry.php?action=save&id=$id\">save</a> | <a href=\"showentry.php?action=unread&id=$id\">mark unread</a></p>";
 	}
 
 	showEntry($id); 
