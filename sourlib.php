@@ -616,7 +616,7 @@ function sendRandomPass($email,$func) {
 	$status = mysql_query($query);
         $row = mysql_fetch_array($status);
 
-	$user = $row['status'];
+	$user = $row['user'];
 	
         $pass = generateCode();
 	$salt = substr("$user",0,2);
