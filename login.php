@@ -10,7 +10,6 @@ if (stripslashes($_POST['checksubmit'])) {
 
 	if ($logincheck == 0) {
 		setLoginCookie($user);
-		header("Location: $siteurl");
 	}
 }
 

@@ -353,7 +353,7 @@ function purgeOldArticles() {
 
 function changePass($user,$pass) {
 	$email = getEmail();
-        $salt = substr("$email",0,2);
+        $salt = substr("$user",0,2);
         $epass = crypt($pass,$salt);
 
 	$query = "update user set pass='$epass' where name='$user'";
@@ -568,7 +568,7 @@ function addCat($cat) {
 }
 
 function addUser($user,$email,$pass) {
-        $salt = substr("$email",0,2);
+        $salt = substr("$user",0,2);
         $epass = crypt($pass,$salt);
 
 	$query = "select * from user";
@@ -612,8 +612,14 @@ function addUser($user,$email,$pass) {
 }
 
 function sendRandomPass($email,$func) {
+	$query = "select user from user where email='$email'";
+	$status = mysql_query($query);
+        $row = mysql_fetch_array($status);
+
+	$user = $row['status'];
+	
         $pass = generateCode();
-	$salt = substr("$email",0,2);
+	$salt = substr("$user",0,2);
 	$epass = crypt($pass,$salt);
 
 	$email = mysql_real_escape_string($email);
