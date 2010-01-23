@@ -10,19 +10,8 @@ include_once("sourlib.php");
 if ((stripslashes(!$_POST['checksubmit'])) && (checkCookie()) ) {
 	showSettingsform();
 } else if (checkCookie()) {
-
-	$username = getUserName();
-        $user = $username;
-        $pass  = stripslashes($_POST['pass']);
-
-        $logincheck = checkLogin($user,$pass);
-
-	if ($logincheck == 0) {
-  		changeSettings($site,$url);
-	} else {
-		echo "the username and/or password you entered was wrong.  please <a href='settings.php'>try again</a>.";
-	}
-
+	$purgedays = $_POST['purgedays'];
+	changeSettings($purgedays);
 } else {
 	echo "please <a href='login.php'>login</a> in order to change the site settings!";
 }

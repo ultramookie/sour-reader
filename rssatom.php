@@ -9,6 +9,7 @@ $ns = array
 (
         'content' => 'http://purl.org/rss/1.0/modules/content/'
 ); 
+
 $query = "select feedid, feedurl from feeds order by feedid";
 $status = mysql_query($query);
 
@@ -59,3 +60,4 @@ while($row = mysql_fetch_array($status))
 
 }
 
+purgeOldArticles();

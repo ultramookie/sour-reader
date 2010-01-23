@@ -80,7 +80,7 @@ function showFeed($feedid) {
 		$time=$row['time'];
 		$date=$row['date'];
 
-		print "<a href=\"showentry.php?id=$id\">$title</a> - $time ($date)<br />";
+		print "<a href=\"showentry.php?id=$id\">$title</a> - $time<br />";
         }
 }
 
@@ -255,14 +255,18 @@ function showAddform() {
 }
 
 function showSettingsform() {
+	$query = "select purgedays from site";
+	$result = mysql_query($query);
+	$row = mysql_fetch_array($result);
+
+	$purgedays = $row['purgedays'];
+	
 	echo "<p><b>general site settings:</b></p>";
 	echo "<form action=\"";
 	echo $_SERVER['PHP_SELF'];
 	echo "\"";
 	echo " method=\"post\">";
-        echo "user: <input type=\"text\" name=\"user\"><br />";
-        echo "pass: <input type=\"password\" name=\"pass\"><br />";
-	echo "purge after: <input type=\"text\" name=\"purge\" \"> days<br />";
+	echo "purge after: <input type=\"text\" name=\"purgedays\" value=\"$purgedays\" \"> days<br />";
 	echo "<input type=\"hidden\" name=\"checksubmit\" value=\"1\">";
 	echo "<input type=\"submit\" name=\"submit\" value=\"update\">";
 	echo "</form>";
@@ -335,6 +339,18 @@ function showPasswordChangeform() {
 	echo "</form>";
 }
 
+function purgeOldArticles() {
+        $query = "select purgedays from site";
+	$result = mysql_query($query);
+        
+	$row = mysql_fetch_array($result);
+
+	$purgedays = $row['purgedays'];
+
+	$query = "delete from main where date_sub(curdate(), interval $purgedays day) >= pubDate AND status='R'";
+	$result = mysql_query($query);
+}
+
 function changePass($user,$pass) {
 	$email = getEmail();
         $salt = substr("$email",0,2);
@@ -364,7 +380,7 @@ function showEntry($id) {
 	$link = $row['link'];
 	$description = $row['description'];
 
-	echo "<h3><a href=\"$link\">$title</a></h3>";
+	echo "<h3><a href=\"$link\" target=\"_new\" >$title</a></h3>";
 	echo "$time ($date)<br /><br />";
 	echo "$description";
 
@@ -372,13 +388,36 @@ function showEntry($id) {
 
 function deleteCat($catid) {
 
-	$query = "update feeds set feedcat='1' where feedcat='$catid'";
+	$query = "select count(*) from categories";
+	$result = mysql_query($query);
+	$row = mysql_fetch_array($result);
+
+	$numcats = $row['count(*)'];
+
+	if ( ($numcats > 1) && ($catid != 1) ) {
+		$query = "update feeds set feedcat='1' where feedcat='$catid'";
+		$result = mysql_query($query);
+
+		$query = "delete from categories where catid='$catid'";
+		$result = mysql_query($query);
+
+		echo "category deleted.";
+	} elseif ($catid == 1) {
+		echo "can't remove the first category!";
+	} else {
+		echo "can't remove last category!";
+	}
+}
+
+function deleteFeed($feedid) {
+	
+	$query = "delete from main where feedid='$feedid'";
+	$result = mysql_query($query);
+	
+	$query = "delete from feeds where feedid='$feedid'";
 	$result = mysql_query($query);
 
-	$query = "delete from categories where catid='$catid'";
-	$result = mysql_query($query);
-
-	echo "category deleted.";
+	echo "feed removed!";
 }
 
 function showCatAddform() {
@@ -486,12 +525,11 @@ function markFeedRead($feedid) {
 
 }
 
-function changeSettings($site,$url,$numberIndex) {
+function changeSettings($purgedays) {
 
-        $site = mysql_real_escape_string($site);
-        $url = mysql_real_escape_string($url);
+        $purgedays = mysql_real_escape_string($purgedays);
 
-	$query = "update site set name='$site', url='$url' limit 1";
+	$query = "update site set purgedays='$purgedays' limit 1";
 	$result = mysql_query($query);
 
 	echo "your settings have been updated!";
@@ -555,6 +593,12 @@ function addUser($user,$email,$pass) {
 		$query = "create table categories ( catid int NOT NULL AUTO_INCREMENT, catname varchar(1024) NOT NULL, PRIMARY KEY(catid)); ";
 		$status = mysql_query($query);
 	
+		$query = "create table site ( purgedays int NOT NULL ); ";
+		$status = mysql_query($query);
+		
+		$query = "insert into site (purgedays) values ('30')";
+		$status = mysql_query($query);
+		
 		$query = "insert into categories (catname) values ('general')";
 		$status = mysql_query($query);
 		
