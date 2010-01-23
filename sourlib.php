@@ -93,13 +93,11 @@ function addEntry($title,$description,$pubDate,$link,$guid,$feed) {
 	$query = "select guid,feedid from main where guid='$guid' and feedid='$feed'";
 	$status = mysql_query($query);
 	if (mysql_num_rows($status) >= 1) {
-		echo "already have article $title!<br />";
 	} else {
 		$timestamp = strtotime($pubDate);
 		$mypubDate = date('YmdHis',$timestamp);
 		$query = "insert into main (title, description, pubDate, link, guid, feedid, status) values ('$title', '$description', '$mypubDate', '$link', '$guid', '$feed', 'N')";
 		$result = mysql_query($query);
-		print "adding entry $title (from $feed) <br />";
 	}
 
 }
@@ -342,13 +340,25 @@ function showPasswordChangeform() {
 function purgeOldArticles() {
         $query = "select purgedays from site";
 	$result = mysql_query($query);
-        
 	$row = mysql_fetch_array($result);
-
 	$purgedays = $row['purgedays'];
 
-	$query = "delete from main where date_sub(curdate(), interval $purgedays day) >= pubDate AND status='R'";
-	$result = mysql_query($query);
+       	$query = "select feedid from feeds";
+       	$feedresult = mysql_query($query);
+
+	while ($feedrow = mysql_fetch_array($feedresult)) {
+		$feedid = $feedrow['feedid'];
+
+        	$query = "select count(*) from feeds where feedid='$feedid'";
+		$result = mysql_query($query);
+		$row = mysql_fetch_array($result);
+		$articlecount = $row['count(*)'];
+	
+		if ($articlecount > 100) {	
+			$query = "delete from main where date_sub(curdate(), interval $purgedays day) >= pubDate AND status='R' limit 50";
+			$result = mysql_query($query);
+		}
+	}
 }
 
 function changePass($user,$pass) {
