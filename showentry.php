@@ -16,8 +16,11 @@
 		} else {
 			markEntryRead($id);
 		}
+	
+		$feedid = getFeedID($id);
+		$feedname = getFeedName($feedid);
 
-		echo "<p class=\"menusecond\"><a href=\"showentry.php?action=save&id=$id\">save</a> | <a href=\"showentry.php?action=unread&id=$id\">mark unread</a></p>";
+		echo "<p class=\"menusecond\"><a href=\"showfeed.php?feedid=$feedid\">&#171; $feedname</a> | <a href=\"showentry.php?action=save&id=$id\">save</a> | <a href=\"showentry.php?action=unread&id=$id\">mark unread</a></p>";
 	}
 
 	showEntry($id); 

@@ -26,7 +26,15 @@ a:hover {
 
 h2 { 
 	font-size: medium; 
-	background:#F0F0F0;
+	background:#CCFF66;
+	padding: 5px;
+}
+
+.feedname {
+	background:#66FF00;
+	color:#000000;
+	text-align:justify;
+	padding: 5px;
 }
 
 .title {
@@ -53,7 +61,8 @@ p {
 .entry {
 	font-size: small;
 	word-wrap: break-word;
-	background:#F0F0F0;
+	background:#CCFF66;
+	color: #000000;
 	padding: 1px 2px;
 	text-align:justify;
 }
@@ -62,7 +71,8 @@ p {
 	font-size: small;
 	text-indent:50px;
 	word-wrap: break-word;
-	background:#F0F0F0;
+	background:#CCFF33;
+	color: #000000;
 	padding: 1px 2px;
 	text-align:justify;
 }
@@ -75,14 +85,14 @@ p {
 }
 
 .menu {
-	background:#BFBFBF;
-	color:#111111;
+	background:#00CC00;
+	color:#000000;
 	text-align:justify;
 	padding: 5px;
 }
 
 .menusecond {
-	background:#33CCFF;
+	background:#33FF00;
 	color:#000000;
 	text-align:justify;
 	padding: 5px;
@@ -114,13 +124,13 @@ p {
 .containerlight {
 	position: relative;
 	height: 40px;
-	background:#F0F0F0;
+	background:#CCFFCC;
 }
 
 .containerdark {
 	position: relative;
 	height: 40px;
-	background:#D0D0D0;
+	background:#99FF99;
 }
 
 .left-element {

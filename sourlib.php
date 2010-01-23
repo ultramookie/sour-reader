@@ -74,14 +74,22 @@ function showFeed($feedid,$action = "unread") {
 
 	if ( preg_match("/^all$/",$feedid) ) {
         	$query = "select id, title, date_format(pubDate, '%H:%i') as time, date_format(pubDate, '%m%d%y') as date from main where $pullstatus order by pubDate DESC";
+		$feedname = "all";
 	} elseif ( preg_match("/^saved$/",$feedid) ) {
         	$query = "select id, title, date_format(pubDate, '%H:%i') as time, date_format(pubDate, '%m%d%y') as date from main where status='S' order by pubDate DESC";
+		$feedname = "saved";
 	} else {
         	$query = "select id, title, date_format(pubDate, '%H:%i') as time, date_format(pubDate, '%m%d%y') as date from main where feedid='$feedid' and ($pullstatus) order by pubDate DESC";
+        	$fnquery = "select feedname from feeds where feedid='$feedid'";
+        	$fnresult = mysql_query($fnquery);
+		$fnrow = mysql_fetch_array($fnresult);
+		$feedname = $fnrow['feedname'];
 	}
         $result = mysql_query($query);
 
 	$lightdark="containerlight";
+
+	echo "<h2 class=\"feedname\">$feedname</h2>";
 
         while ($row = mysql_fetch_array($result)) {
 		$id=$row['id'];
@@ -434,9 +442,26 @@ function saveEntry($id) {
 	$result = mysql_query($query);
 }
 
+function getFeedName($feedid) {
+       	$query = "select feedname from feeds where feedid='$feedid'";
+       	$result = mysql_query($query);
+	$row = mysql_fetch_array($result);
+	$feedname = $row['feedname'];
+	return($feedname);
+}
+
+function getFeedID($id) {
+
+        $query = "select feedid from main where id='$id'";
+	$result = mysql_query($query);
+	$row = mysql_fetch_array($result);
+	$feedid = $row['feedid'];
+	return($feedid);
+}
+
 function showEntry($id) {
 
-        $query = "select title, date_format(pubDate, '%r') as time, date_format(pubDate, '%m/%d/%y') as date, link, description from main where id='$id'";
+        $query = "select title, date_format(pubDate, '%r') as time, date_format(pubDate, '%m/%d/%y') as date, link, description, feedid from main where id='$id'";
 	$result = mysql_query($query);
         
 	$row = mysql_fetch_array($result);
@@ -445,8 +470,9 @@ function showEntry($id) {
 	$date = $row['date'];
 	$link = $row['link'];
 	$description = $row['description'];
+	$feedid = $row['feedid'];
 
-	echo "<h2><a href=\"$link\" target=\"_new\" >$title</a></h2>";
+	echo "<h2><a href=\"$link\" target=\"_blank\" >$title</a></h2>";
 	echo "<p class=\"timedate\">$time &#149; $date</p>";
 	echo "<p>$description</p>";
 
@@ -678,11 +704,11 @@ function addUser($user,$email,$pass) {
 }
 
 function sendRandomPass($email,$func) {
-	$query = "select user from user where email='$email'";
+	$query = "select name from user where email='$email'";
 	$status = mysql_query($query);
         $row = mysql_fetch_array($status);
 
-	$user = $row['user'];
+	$user = $row['name'];
 	
         $pass = generateCode();
 	$salt = substr("$user",0,2);
