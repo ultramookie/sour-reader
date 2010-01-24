@@ -27,7 +27,7 @@ while($row = mysql_fetch_array($status))
         curl_setopt ( $session, CURLOPT_CONNECTTIMEOUT, 2 );
 	curl_setopt ( $session, CURLOPT_FOLLOWLOCATION, 1);
 	curl_setopt ( $session, CURLOPT_USERAGENT, $useragent );
-
+	curl_setopt ( $session, CURLOPT_ENCODING, "gzip" );
         $result = curl_exec ( $session );
         curl_close( $session );
         
