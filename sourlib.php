@@ -426,7 +426,7 @@ function changePass($user,$pass) {
 
 function markEntryRead($id) {
 
-	$query = "update main set status='R' where id='$id'";
+	$query = "update main set status='R' where id='$id' AND status<>'S'";
 	$result = mysql_query($query);
 }
 
