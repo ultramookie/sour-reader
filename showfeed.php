@@ -10,6 +10,8 @@
 		echo "<p class=\"menusecond\"><a href=\"index.php?action=markread&feedid=$feedid\">mark read</a> | <a href=\"showfeed.php?action=read&feedid=$feedid\">show read</a> | <a href=\"editfeed.php?feedid=$feedid\">edit feed</a> | <a href=\"deletefeed.php?feedid=$feedid\">unsubscribe</a></p>";
 	
 		showFeed($feedid,$action);
+
+		echo "<p class=\"menusecond\"><a href=\"index.php?action=markread&feedid=$feedid\">mark read</a> | <a href=\"showfeed.php?action=read&feedid=$feedid\">show read</a> | <a href=\"editfeed.php?feedid=$feedid\">edit feed</a> | <a href=\"deletefeed.php?feedid=$feedid\">unsubscribe</a></p>";
 	}
 
 	
