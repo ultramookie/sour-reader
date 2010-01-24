@@ -5,6 +5,9 @@ include_once("sourlib.php");
 // For clean errors on xml parsing
 libxml_use_internal_errors(true);
 
+// Useragent
+$useragent = "SourReaderFeedUpdater/1.0 (http://github.com/ultramookie/sour-reader)";
+
 $ns = array
 (
         'content' => 'http://purl.org/rss/1.0/modules/content/'
@@ -23,6 +26,8 @@ while($row = mysql_fetch_array($status))
         curl_setopt ( $session, CURLOPT_RETURNTRANSFER, TRUE );
         curl_setopt ( $session, CURLOPT_CONNECTTIMEOUT, 2 );
 	curl_setopt ( $session, CURLOPT_FOLLOWLOCATION, 1);
+	curl_setopt ( $session, CURLOPT_USERAGENT, $useragent );
+
         $result = curl_exec ( $session );
         curl_close( $session );
         
