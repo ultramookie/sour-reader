@@ -48,7 +48,7 @@ function showFeedsFrontPage() {
 		$catcount = $catcountrow['count(main.id)'];
 
 		if ($catcount > 0) {
-			echo "<p class=\"entry\"><b>$catname ($catcount)</b></p>";
+			echo "<p class=\"entry\"><b><a href=\"showfeed.php?feedid=category&catid=$catid\">$catname</a> ($catcount)</b></p>";
        	 		$query = "select feedid, feedname from feeds where feedcat='$catid' order by feedname;";
         		$feedresult = mysql_query($query);
 
@@ -71,7 +71,16 @@ function showFeedsFrontPage() {
         }
 }
 
-function showFeed($feedid,$action = "unread") {
+function printFeedbar($feedid,$action,$catid = 0) {
+
+	if (preg_match("/^category$/",$feedid)) {
+		echo "<p class=\"menusecond\"><a href=\"index.php?action=markcatread&catid=$catid\">mark read</a> | <a href=\"showfeed.php?action=read&feedid=$feedid\">show read</a> | <a href=\"editfeed.php?feedid=$feedid\">edit feed</a> | <a href=\"deletefeed.php?feedid=$feedid\">unsubscribe</a></p>";
+	} else {
+		echo "<p class=\"menusecond\"><a href=\"index.php?action=markread&feedid=$feedid\">mark read</a> | <a href=\"showfeed.php?action=read&feedid=$feedid\">show read</a> | <a href=\"editfeed.php?feedid=$feedid\">edit feed</a> | <a href=\"deletefeed.php?feedid=$feedid\">unsubscribe</a></p>";
+	}
+}
+
+function showFeed($feedid,$action = "unread",$catid = 0) {
 
 	if (preg_match("/^read$/",$action)) {
 		$pullstatus = " status='N' or status='R' ";
@@ -85,6 +94,13 @@ function showFeed($feedid,$action = "unread") {
 	} elseif ( preg_match("/^saved$/",$feedid) ) {
         	$query = "select id, title, date_format(pubDate, '%H:%i') as time, date_format(pubDate, '%m%d%y') as date from main where status='S' order by pubDate DESC";
 		$feedname = "saved";
+	} elseif ( preg_match("/^category$/",$feedid) ) {
+		$query = "select catname from categories where catid='$catid'";
+        	$result = mysql_query($query);
+		$row = mysql_fetch_array($result);
+		$catname = $row['catname'];
+        	$query = "select id, title, date_format(pubDate, '%H:%i') as time, date_format(pubDate, '%m%d%y') as date from main,feeds,categories where feeds.feedcat='$catid' and main.status='N' and categories.catid='$catid' and feeds.feedid=main.feedid order by pubDate DESC";
+		$feedname = "$catname";
 	} else {
         	$query = "select id, title, date_format(pubDate, '%H:%i') as time, date_format(pubDate, '%m%d%y') as date from main where feedid='$feedid' and ($pullstatus) order by pubDate DESC";
         	$fnquery = "select feedname from feeds where feedid='$feedid'";
@@ -620,6 +636,13 @@ function markFeedRead($feedid) {
 	} else {
 		$query = "update main set status='R' where feedid='$feedid' and status='N'";
 	}
+	$result = mysql_query($query);
+
+}
+
+function markCatRead($catid) {
+
+	$query = "update main,feeds,categories set main.status='R' where feeds.feedcat='$catid' and main.status='N' and categories.catid='$catid' and feeds.feedid=main.feedid";
 	$result = mysql_query($query);
 
 }

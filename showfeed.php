@@ -5,13 +5,17 @@
 	$feedid = mysql_real_escape_string($feedid);
 	$action = $_GET['action'];
 	$action = mysql_real_escape_string($action);
+	$catid = $_GET['catid'];
+	$catid = mysql_real_escape_string($catid);
+
 
 	if (checkCookie()) {
-		echo "<p class=\"menusecond\"><a href=\"index.php?action=markread&feedid=$feedid\">mark read</a> | <a href=\"showfeed.php?action=read&feedid=$feedid\">show read</a> | <a href=\"editfeed.php?feedid=$feedid\">edit feed</a> | <a href=\"deletefeed.php?feedid=$feedid\">unsubscribe</a></p>";
-	
-		showFeed($feedid,$action);
 
-		echo "<p class=\"menusecond\"><a href=\"index.php?action=markread&feedid=$feedid\">mark read</a> | <a href=\"showfeed.php?action=read&feedid=$feedid\">show read</a> | <a href=\"editfeed.php?feedid=$feedid\">edit feed</a> | <a href=\"deletefeed.php?feedid=$feedid\">unsubscribe</a></p>";
+		printFeedbar($feedid,$action,$catid);	
+		
+		showFeed($feedid,$action,$catid);
+	
+		printFeedbar($feedid,$action,$catid);	
 	}
 
 	
