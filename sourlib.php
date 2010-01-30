@@ -143,6 +143,11 @@ function showFeed($feedid,$action = "unread",$catid = 0) {
 		} else {
 			$lightdark="containerlight";
 		}
+		if ($catid > 0) {
+			$realfeedid = getFeedID($id);
+			$realfeedname = getFeedName($realfeedid);
+			$title = $title . " [ <i>" . $realfeedname . "</i> ] ";
+		}
 
 		print "<div class=\"$lightdark\"><div class=\"left-element\"><a href=\"showentry.php?id=$id&catid=$catid\">$title</a></div><div class=\"right-element\">$time &#149; $date</div></div>";
         }
