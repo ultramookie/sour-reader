@@ -47,23 +47,25 @@ function showFeedsFrontPage() {
 		$catname = $catcountrow['catname'];
 		$catcount = $catcountrow['count(main.id)'];
 
-		echo "<p class=\"entry\"><b>$catname ($catcount)</b></p>";
-        	$query = "select feedid, feedname from feeds where feedcat='$catid' order by feedname;";
-        	$feedresult = mysql_query($query);
+		if ($catcount > 0) {
+			echo "<p class=\"entry\"><b>$catname ($catcount)</b></p>";
+       	 		$query = "select feedid, feedname from feeds where feedcat='$catid' order by feedname;";
+        		$feedresult = mysql_query($query);
 
-		while ($feedrow = mysql_fetch_array($feedresult)) {
-			$feedid = $feedrow['feedid'];
-			$feedname = $feedrow['feedname'];
+			while ($feedrow = mysql_fetch_array($feedresult)) {
+				$feedid = $feedrow['feedid'];
+				$feedname = $feedrow['feedname'];
 
-        		$query = "select count(*) from main where status='N' and feedid='$feedid';";
-        		$indfeedresult = mysql_query($query);
+        			$query = "select count(*) from main where status='N' and feedid='$feedid';";
+        			$indfeedresult = mysql_query($query);
 		
-			$indfeedrow = mysql_fetch_array($indfeedresult)	;
+				$indfeedrow = mysql_fetch_array($indfeedresult)	;
 	
-			$feedcount = $indfeedrow['count(*)'];
+				$feedcount = $indfeedrow['count(*)'];
 
-			if ($feedcount > 0) {
-				echo "<p class=\"entryind\"><a href=\"showfeed.php?feedid=$feedid\">$feedname</a> (<b>$feedcount</b>)</p>";
+				if ($feedcount > 0) {
+					echo "<p class=\"entryind\"><a href=\"showfeed.php?feedid=$feedid\">$feedname</a> (<b>$feedcount</b>)</p>";
+				}
 			}
 		}
         }
