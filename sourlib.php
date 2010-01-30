@@ -35,14 +35,19 @@ function showFeedsFrontPage() {
 	echo "<p class=\"entry\"><a href=\"showfeed.php?feedid=all\"><b>all new ($count)</b></a></p>";
 	echo "<p class=\"entry\"><a href=\"showfeed.php?feedid=saved\"><b>saved</b></a></p>";
 
-        $query = "select catid, catname from categories order by catname";
+        $query = "select catid from categories order by catname";
         $result = mysql_query($query);
 
         while ($row = mysql_fetch_array($result)) {
-		$catname=$row['catname'];
 		$catid=$row['catid'];
 
-		echo "<p class=\"entry\"><b>$catname</b></p>";
+		$catcountquery = "select count(main.id),categories.catname from main,feeds,categories where feeds.feedcat='$catid' and main.status='N' and categories.catid='$catid' and feeds.feedid=main.feedid";
+		$catcountresult = mysql_query($catcountquery);
+		$catcountrow = mysql_fetch_array($catcountresult);
+		$catname = $catcountrow['catname'];
+		$catcount = $catcountrow['count(main.id)'];
+
+		echo "<p class=\"entry\"><b>$catname ($catcount)</b></p>";
         	$query = "select feedid, feedname from feeds where feedcat='$catid' order by feedname;";
         	$feedresult = mysql_query($query);
 
