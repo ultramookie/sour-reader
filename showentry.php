@@ -7,6 +7,8 @@
 	$id = mysql_real_escape_string($id);
 	$action = $_GET['action'];
 	$action = mysql_real_escape_string($action);
+	$catid = $_GET['catid'];
+	$catid = mysql_real_escape_string($catid);
 
 	if (checkCookie()) {
 		if(preg_match("/^save$/",$action)) {
@@ -16,11 +18,8 @@
 		} else {
 			markEntryRead($id);
 		}
-	
-		$feedid = getFeedID($id);
-		$feedname = getFeedName($feedid);
 
-		echo "<p class=\"menusecond\"><a href=\"showfeed.php?feedid=$feedid\">&#171; $feedname</a> | <a href=\"showentry.php?action=save&id=$id\">save</a> | <a href=\"showentry.php?action=unread&id=$id\">mark unread</a></p>";
+		printEntrybar($id,$catid);
 	}
 
 	showEntry($id); 

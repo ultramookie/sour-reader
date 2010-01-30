@@ -80,6 +80,24 @@ function printFeedbar($feedid,$action,$catid = 0) {
 	}
 }
 
+function printEntrybar($id,$catid = 0) {
+
+	if ($catid > 0) {
+		$query = "select catname from categories where catid='$catid'";
+		$result = mysql_query($query);
+		$row = mysql_fetch_array($result);
+		$catname = $row['catname'];
+
+		echo "<p class=\"menusecond\"><a href=\"showfeed.php?feedid=category&catid=$catid\">&#171; $catname</a> | <a href=\"showentry.php?action=save&id=$id\">save</a> | <a href=\"showentry.php?action=unread&id=$id\">mark unread</a></p>";
+	} else {
+
+		$feedid = getFeedID($id);
+		$feedname = getFeedName($feedid);
+
+		echo "<p class=\"menusecond\"><a href=\"showfeed.php?feedid=$feedid\">&#171; $feedname</a> | <a href=\"showentry.php?action=save&id=$id\">save</a> | <a href=\"showentry.php?action=unread&id=$id\">mark unread</a></p>";
+	}
+}
+
 function showFeed($feedid,$action = "unread",$catid = 0) {
 
 	if (preg_match("/^read$/",$action)) {
@@ -126,7 +144,7 @@ function showFeed($feedid,$action = "unread",$catid = 0) {
 			$lightdark="containerlight";
 		}
 
-		print "<div class=\"$lightdark\"><div class=\"left-element\"><a href=\"showentry.php?id=$id\">$title</a></div><div class=\"right-element\">$time &#149; $date</div></div>";
+		print "<div class=\"$lightdark\"><div class=\"left-element\"><a href=\"showentry.php?id=$id&catid=$catid\">$title</a></div><div class=\"right-element\">$time &#149; $date</div></div>";
         }
 }
 
