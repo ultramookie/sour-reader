@@ -3,12 +3,12 @@ body {
 	font-family: "Verdana", Sans;
 	color:#000000;
 	background:#FFFFFF; 
-	width: 700px;
+	width: 768px;
 }
 
 .main {
 	margin-left: 10px;
-	width: 680px;
+	width: 750px;
 }
 
 a {
@@ -100,25 +100,6 @@ p {
 
 .footer {
 	text-align:right;
-}
-
-.box { 
-	border: 1px 
-	solid #cecece; 
-	padding: 4px 15px; 
-	margin: 1px;
-	text-align:right;
-}
-
-.count {
-	font-size: medium;
-	font-family: "Verdana", Sans;
-}
-
-.error {
-	font-size: medium;
-	font-family: "Verdana", Sans;
-	color: red;
 }
 
 .containerlight {
