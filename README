@@ -8,9 +8,10 @@ something I'll actually use.
 SYSTEM REQUIREMENTS
         php5 (with simplexml)
         mysql
+	crontab access
 
 INSTALL INSTRUCTIONS
-        copy all files over to wherever you want to host your microblog.
+        copy all files over to wherever you want to host your reader.
 
         from that location, move config-example.php to config.php.
 
