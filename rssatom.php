@@ -35,6 +35,13 @@ while($row = mysql_fetch_array($status))
       
       	if (!$xml) {
 		print "<hr />$url is not a valid rss or atom feed!<hr />";
+		$title = "$url is not a valid rss or atom feed!";
+		$description = "$url is not a valid rss or atom feed!";
+		$content = "$url is not a valid rss or atom feed!";
+		$link = "$url";
+		$pubDate = date('c');
+		$guid = $link . date('c');
+		addEntry($title,$description,$pubDate,$link,$guid,$id);
 	} elseif ($xml->channel->item) {
 		foreach ($xml->channel->item as $result) {
 			$title = $result->title;
@@ -59,7 +66,13 @@ while($row = mysql_fetch_array($status))
 			addEntry($title,$description,$pubDate,$link,$guid,$id);
 		}
 	} else {
-		print "<hr />$url is not a valid rss or atom feed!<hr />";
+			$title = "$url is not a valid rss or atom feed!";
+			$description = "$url is not a valid rss or atom feed!";
+			$content = "$url is not a valid rss or atom feed!";
+			$link = "$url";
+			$pubDate = date('c');
+			$guid = $link . date('c');
+			addEntry($title,$description,$pubDate,$link,$guid,$id);
 	}
 
 

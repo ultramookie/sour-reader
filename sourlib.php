@@ -117,10 +117,10 @@ function showFeed($feedid,$action = "unread",$catid = 0) {
         	$result = mysql_query($query);
 		$row = mysql_fetch_array($result);
 		$catname = $row['catname'];
-        	$query = "select id, title, date_format(pubDate, '%H:%i') as time, date_format(pubDate, '%m%d%y') as date from main,feeds,categories where feeds.feedcat='$catid' and main.status='N' and categories.catid='$catid' and feeds.feedid=main.feedid order by pubDate DESC";
+        	$query = "select id, title, date_format(pubDate, '%H:%i') as time, date_format(pubDate, '%m.%d.%y') as date from main,feeds,categories where feeds.feedcat='$catid' and main.status='N' and categories.catid='$catid' and feeds.feedid=main.feedid order by pubDate DESC";
 		$feedname = "$catname";
 	} else {
-        	$query = "select id, title, date_format(pubDate, '%H:%i') as time, date_format(pubDate, '%m%d%y') as date from main where feedid='$feedid' and ($pullstatus) order by pubDate DESC";
+        	$query = "select id, title, date_format(pubDate, '%H:%i') as time, date_format(pubDate, '%m.%d.%y') as date from main where feedid='$feedid' and ($pullstatus) order by pubDate DESC";
         	$fnquery = "select feedname from feeds where feedid='$feedid'";
         	$fnresult = mysql_query($fnquery);
 		$fnrow = mysql_fetch_array($fnresult);
@@ -436,7 +436,7 @@ function showPasswordChangeform() {
 }
 
 function purgeOldArticles() {
-        $query = "select purgedays from site";
+        $query = "select purgedays from site limit 1";
 	$result = mysql_query($query);
 	$row = mysql_fetch_array($result);
 	$purgedays = $row['purgedays'];
@@ -447,14 +447,13 @@ function purgeOldArticles() {
 	while ($feedrow = mysql_fetch_array($feedresult)) {
 		$feedid = $feedrow['feedid'];
 
-        	$query = "select count(*) from feeds where feedid='$feedid'";
-		$result = mysql_query($query);
-		$row = mysql_fetch_array($result);
-		$articlecount = $row['count(*)'];
-	
+        	$countquery = "select count(*) from main where feedid='$feedid'";
+		$countresult = mysql_query($countquery);
+		$countrow = mysql_fetch_array($countresult);
+		$articlecount = $countrow['count(*)'];
 		if ($articlecount > 100) {	
-			$query = "delete from main where date_sub(curdate(), interval $purgedays day) >= pubDate AND status='R' limit 50";
-			$result = mysql_query($query);
+			$deletequery = "delete from main where date_sub(curdate(), interval $purgedays day) >= pubDate AND status='R' AND feedid='$feedid'";
+			$deleteresult = mysql_query($deletequery);
 		}
 	}
 }
