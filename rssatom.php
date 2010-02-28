@@ -34,14 +34,15 @@ while($row = mysql_fetch_array($status))
 	$xml = simplexml_load_string($result, 'SimpleXMLElement', LIBXML_NOCDATA);
       
       	if (!$xml) {
-		print "<hr />$url is not a valid rss or atom feed!<hr />";
-		$title = "$url is not a valid rss or atom feed!";
-		$description = "$url is not a valid rss or atom feed!";
-		$content = "$url is not a valid rss or atom feed!";
+		print "<hr />$url did not return valid xml!<hr />";
+		$title = "$url did not return valid xml!";
+		$description = "$url did not return valid xml!";
+		$content = "$url did not return valid xml!";
 		$link = "$url";
 		$pubDate = date('c');
+		$updateTime = date('c');
 		$guid = $link . date('c');
-		addEntry($title,$description,$pubDate,$link,$guid,$id);
+		addEntry($title,$description,$pubDate,$link,$guid,$id,$updateTime);
 	} elseif ($xml->channel->item) {
 		foreach ($xml->channel->item as $result) {
 			$title = $result->title;
@@ -49,11 +50,12 @@ while($row = mysql_fetch_array($status))
 			$pubDate =  $result->pubDate;
 			$link =  $result->link;
 			$guid = $result->guid;
+			$updateTime = date('c');
 			$content = $result->children($ns['content']);
 			if ($content) {
 				$description = $content;
 			}
-			addEntry($title,$description,$pubDate,$link,$guid,$id);
+			addEntry($title,$description,$pubDate,$link,$guid,$id,$updateTime);
 		}
 	} elseif ($xml->entry) {
 		foreach ($xml->entry as $result) {
@@ -62,8 +64,9 @@ while($row = mysql_fetch_array($status))
 			$pubDate = $result->updated;
 			$link = $result->link['href'];
 			$guid = $result->id;
+			$updateTime = date('c');
 			$content = $result->content;
-			addEntry($title,$description,$pubDate,$link,$guid,$id);
+			addEntry($title,$description,$pubDate,$link,$guid,$id,$updateTime);
 		}
 	} else {
 			$title = "$url is not a valid rss or atom feed!";
@@ -71,9 +74,11 @@ while($row = mysql_fetch_array($status))
 			$content = "$url is not a valid rss or atom feed!";
 			$link = "$url";
 			$pubDate = date('c');
+			$updateTime = date('c');
 			$guid = $link . date('c');
-			addEntry($title,$description,$pubDate,$link,$guid,$id);
+			addEntry($title,$description,$pubDate,$link,$guid,$id,$updateTime);
 	}
+		
 
 
 }

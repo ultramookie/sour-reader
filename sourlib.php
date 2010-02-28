@@ -153,7 +153,7 @@ function showFeed($feedid,$action = "unread",$catid = 0) {
         }
 }
 
-function addEntry($title,$description,$pubDate,$link,$guid,$feed) {
+function addEntry($title,$description,$pubDate,$link,$guid,$feed,$updated) {
 	$title = mysql_real_escape_string($title);
 	$description = mysql_real_escape_string($description);
 	$link = mysql_real_escape_string($link);
@@ -164,8 +164,13 @@ function addEntry($title,$description,$pubDate,$link,$guid,$feed) {
 	if (mysql_num_rows($status) >= 1) {
 	} else {
 		$timestamp = strtotime($pubDate);
+		$updatestamp = strtotime($updated);
 		$mypubDate = date('YmdHis',$timestamp);
-		$query = "insert into main (title, description, pubDate, link, guid, feedid, status) values ('$title', '$description', '$mypubDate', '$link', '$guid', '$feed', 'N')";
+		$updateDate = date('YmdHis',$updatestamp);
+		$query = "insert into main (title, description, pubDate, link, guid, feedid, status,updateTime) values ('$title', '$description', '$mypubDate', '$link', '$guid', '$feed', 'N', '$updateDate')";
+		$result = mysql_query($query);
+
+		$query = "update feeds set lastUpdate='$updateDate' where feedid='$feed'";
 		$result = mysql_query($query);
 	}
 
@@ -452,7 +457,7 @@ function purgeOldArticles() {
 		$countrow = mysql_fetch_array($countresult);
 		$articlecount = $countrow['count(*)'];
 		if ($articlecount > 100) {	
-			$deletequery = "delete from main where date_sub(curdate(), interval $purgedays day) >= pubDate AND status='R' AND feedid='$feedid'";
+			$deletequery = "delete from main where date_sub(curdate(), interval $purgedays day) >= updateTime AND status='R' AND feedid='$feedid'";
 			$deleteresult = mysql_query($deletequery);
 		}
 	}
@@ -728,10 +733,10 @@ function addUser($user,$email,$pass) {
 		$query = "create table user ( name varchar(30) NOT NULL, email varchar(30) NOT NULL, pass varchar(30) NOT NULL, secret varchar(6), cookie varchar(300) )";
 		$status = mysql_query($query);
 
-		$query = "create table main ( id int NOT NULL AUTO_INCREMENT, title varchar(1024) NOT NULL, description varchar(50000), pubDate DATETIME NOT NULL, link varchar(1024) NOT NULL, guid varchar(1024) NOT NULL, status varchar(2), feedid int NOT NULL, PRIMARY KEY (id)); ";
+		$query = "create table main ( id int NOT NULL AUTO_INCREMENT, title varchar(1024) NOT NULL, description varchar(50000), pubDate DATETIME NOT NULL, link varchar(1024) NOT NULL, guid varchar(1024) NOT NULL, status varchar(2), feedid int NOT NULL, updateTime DATETIME NOT NULL, PRIMARY KEY (id)); ";
 		$status = mysql_query($query);
 		
-		$query = "create table feeds ( feedid int NOT NULL AUTO_INCREMENT, feedname varchar(1024) NOT NULL, feedurl varchar(1024) NOT NULL, feedcat int NOT NULL, PRIMARY KEY(feedid) ); ";
+		$query = "create table feeds ( feedid int NOT NULL AUTO_INCREMENT, feedname varchar(1024) NOT NULL, feedurl varchar(1024) NOT NULL, feedcat int NOT NULL, lastUpdate DATETIME NOT NULL, PRIMARY KEY(feedid) ); ";
 		$status = mysql_query($query);
 		
 		$query = "create table categories ( catid int NOT NULL AUTO_INCREMENT, catname varchar(1024) NOT NULL, PRIMARY KEY(catid)); ";
