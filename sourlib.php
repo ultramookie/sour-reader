@@ -440,8 +440,40 @@ function showPasswordChangeform() {
 	echo "</form>";
 }
 
+function getFeedCount($feedid) {
+	$feedcount = 0;
+
+	$query = "select feedurl from feeds where feedid='$feedid'";
+	$status = mysql_query($query);
+	$row = mysql_fetch_array($status);
+	$url = $row['feedurl'];
+
+	$session = curl_init();
+	curl_setopt ( $session, CURLOPT_URL, $url );
+	curl_setopt ( $session, CURLOPT_RETURNTRANSFER, TRUE );
+	curl_setopt ( $session, CURLOPT_CONNECTTIMEOUT, 2 );
+	curl_setopt ( $session, CURLOPT_FOLLOWLOCATION, 1);
+	curl_setopt ( $session, CURLOPT_USERAGENT, $useragent );
+	curl_setopt ( $session, CURLOPT_ENCODING, "gzip" );
+	$result = curl_exec ( $session );
+	curl_close( $session );
+
+	$xml = simplexml_load_string($result, 'SimpleXMLElement', LIBXML_NOCDATA);
+
+	if ($xml->channel->item) {
+		foreach ($xml->channel->item as $result) {
+			$feedcount++;
+		}
+	} elseif ($xml->entry) {
+		foreach ($xml->entry as $result) {
+			$feedcount++;
+		}
+	}
+
+	return $feedcount;
+}
+
 function purgeOldArticles() {
-	$leavebehind = 50;
         $query = "select purgedays from site limit 1";
 	$result = mysql_query($query);
 	$row = mysql_fetch_array($result);
@@ -453,11 +485,13 @@ function purgeOldArticles() {
 	while ($feedrow = mysql_fetch_array($feedresult)) {
 		$feedid = $feedrow['feedid'];
 
+		$leavebehind = getFeedCount($feedid);
+
         	$countquery = "select count(*) from main where feedid='$feedid'";
 		$countresult = mysql_query($countquery);
 		$countrow = mysql_fetch_array($countresult);
 		$articlecount = $countrow['count(*)'];
-		if ($articlecount > 100) {	
+		if ($articlecount > ($leavebehind + 1) ) {	
 			$totalremove = $articlecount - $leavebehind;
 			$deletequery = "delete from main where date_sub(curdate(), interval $purgedays day) >= updateTime AND status='R' AND feedid='$feedid' ORDER BY updateTime ASC LIMIT $totalremove";
 			$deleteresult = mysql_query($deletequery);
