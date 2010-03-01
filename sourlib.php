@@ -441,6 +441,7 @@ function showPasswordChangeform() {
 }
 
 function purgeOldArticles() {
+	$leavebehind = 50;
         $query = "select purgedays from site limit 1";
 	$result = mysql_query($query);
 	$row = mysql_fetch_array($result);
@@ -457,7 +458,8 @@ function purgeOldArticles() {
 		$countrow = mysql_fetch_array($countresult);
 		$articlecount = $countrow['count(*)'];
 		if ($articlecount > 100) {	
-			$deletequery = "delete from main where date_sub(curdate(), interval $purgedays day) >= updateTime AND status='R' AND feedid='$feedid'";
+			$totalremove = $articlecount - $leavebehind;
+			$deletequery = "delete from main where date_sub(curdate(), interval $purgedays day) >= updateTime AND status='R' AND feedid='$feedid' ORDER BY updateTime ASC LIMIT $totalremove";
 			$deleteresult = mysql_query($deletequery);
 		}
 	}
