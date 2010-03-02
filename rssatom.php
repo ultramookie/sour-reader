@@ -32,8 +32,10 @@ while($row = mysql_fetch_array($status))
         curl_close( $session );
         
 	$xml = simplexml_load_string($result, 'SimpleXMLElement', LIBXML_NOCDATA);
-      
-      	if (!$xml) {
+
+	if ($result == FALSE) {
+		print "<hr />There was an issue fetching $url<hr />";
+	} elseif (!$xml) {
 		print "<hr />$url did not return valid xml!<hr />";
 		$title = "$url did not return valid xml!";
 		$description = "$url did not return valid xml!";
