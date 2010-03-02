@@ -395,7 +395,7 @@ function showFeedlist() {
 			$lightdark="containerlight";
 		}
 
-		print "<div class=\"$lightdark\"><div class=\"left-element\">$feedname</div><div class=\"right-element\">[<a href=\"deletefeed.php?feedid=$feedid\">d</a>][<a href=\"editfeed.php?feedid=$feedid\">e</a>]</div></div>";
+		print "<div class=\"$lightdark\"><div class=\"left-element\"><a href=\"showfeed.php?feedid=$feedid&action=read\">$feedname</a></div><div class=\"right-element\">[<a href=\"deletefeed.php?feedid=$feedid\">d</a>][<a href=\"editfeed.php?feedid=$feedid\">e</a>]</div></div>";
 	}
 	echo "</ul>";
 }
