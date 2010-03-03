@@ -6,8 +6,8 @@ Just me learning about SimpleXML and RSS and Atom.  Maybe even write
 something I'll actually use.
 
 SYSTEM REQUIREMENTS
-        php5 (with simplexml)
-        mysql
+	php5 (with simplexml)
+	mysql
 	crontab access
 
 INSTALL INSTRUCTIONS
@@ -35,5 +35,7 @@ Have fun.  This is a tool I will keep tweaking and playing with to learn.  So,
 check the github repo for updates:
 
 http://github.com/ultramookie/sour-reader
+
+Thanks to the yuilibrary.com for the awesome CSS stuff!
 
 Use at your own risk :)
