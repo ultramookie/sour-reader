@@ -485,13 +485,13 @@ function purgeOldArticles() {
 	while ($feedrow = mysql_fetch_array($feedresult)) {
 		$feedid = $feedrow['feedid'];
 
-		$leavebehind = getFeedCount($feedid);
+		$leavebehind = getFeedCount($feedid) + 10;
 
         	$countquery = "select count(*) from main where feedid='$feedid'";
 		$countresult = mysql_query($countquery);
 		$countrow = mysql_fetch_array($countresult);
 		$articlecount = $countrow['count(*)'];
-		if ($articlecount > ($leavebehind + 1) ) {	
+		if ($articlecount > $leavebehind) {	
 			$totalremove = $articlecount - $leavebehind;
 			$deletequery = "delete from main where date_sub(curdate(), interval $purgedays day) >= updateTime AND status='R' AND feedid='$feedid' ORDER BY updateTime ASC LIMIT $totalremove";
 			$deleteresult = mysql_query($deletequery);
