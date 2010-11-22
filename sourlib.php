@@ -456,6 +456,11 @@ function purgeOldArticles() {
 
 	while($row = mysql_fetch_array($status))
 	{
+        	$countquery = "select count(*) from main where feedid='$id'";
+		$countresult = mysql_query($countquery);
+		$countrow = mysql_fetch_array($countresult);
+		$articlecount = $countrow['count(*)'];
+
 		$url = $row['feedurl'];
 		$id = $row['feedid'];
 
@@ -473,20 +478,15 @@ function purgeOldArticles() {
 
 		if ($result == FALSE) {
 			print "<hr />There was an issue fetching $url<hr />";
-			$count = 0;
+			$count = $articlecount;
 		} elseif ($xml->channel->item) {
 			$count = count($xml->channel->item);
 		} elseif ($xml->entry) {
 			$count = count($xml->entry);
 		} else {
-			$count = 0;
+			$count = $articlecount;
 		}
 	
-        	$countquery = "select count(*) from main where feedid='$id'";
-		$countresult = mysql_query($countquery);
-		$countrow = mysql_fetch_array($countresult);
-		$articlecount = $countrow['count(*)'];
-
 		$totalremove = $articlecount - $count;
 
 		if ($totalremove > $count) {	
