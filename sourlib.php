@@ -440,60 +440,57 @@ function showPasswordChangeform() {
 	echo "</form>";
 }
 
-function getFeedCount($feedid) {
-	$feedcount = 0;
-
-	$query = "select feedurl from feeds where feedid='$feedid'";
-	$status = mysql_query($query);
-	$row = mysql_fetch_array($status);
-	$url = $row['feedurl'];
-
-	$session = curl_init();
-	curl_setopt ( $session, CURLOPT_URL, $url );
-	curl_setopt ( $session, CURLOPT_RETURNTRANSFER, TRUE );
-	curl_setopt ( $session, CURLOPT_CONNECTTIMEOUT, 2 );
-	curl_setopt ( $session, CURLOPT_FOLLOWLOCATION, 1);
-	curl_setopt ( $session, CURLOPT_USERAGENT, $useragent );
-	curl_setopt ( $session, CURLOPT_ENCODING, "gzip" );
-	$result = curl_exec ( $session );
-	curl_close( $session );
-
-	$xml = simplexml_load_string($result, 'SimpleXMLElement', LIBXML_NOCDATA);
-
-	if ($xml->channel->item) {
-		foreach ($xml->channel->item as $result) {
-			$feedcount++;
-		}
-	} elseif ($xml->entry) {
-		foreach ($xml->entry as $result) {
-			$feedcount++;
-		}
-	}
-
-	return $feedcount;
-}
-
 function purgeOldArticles() {
+	libxml_use_internal_errors(true);
+
         $query = "select purgedays from site limit 1";
 	$result = mysql_query($query);
 	$row = mysql_fetch_array($result);
 	$purgedays = $row['purgedays'];
+	$useragent = "SourReaderFeedUpdater/1.0 (http://github.com/ultramookie/sour-reader)";
 
-       	$query = "select feedid from feeds";
-       	$feedresult = mysql_query($query);
+	$ns = array ( 'content' => 'http://purl.org/rss/1.0/modules/content/' ); 
 
-	while ($feedrow = mysql_fetch_array($feedresult)) {
-		$feedid = $feedrow['feedid'];
+	$query = "select feedid, feedurl from feeds order by feedid";
+	$status = mysql_query($query);
 
-		$leavebehind = getFeedCount($feedid) + 10;
+	while($row = mysql_fetch_array($status))
+	{
+		$url = $row['feedurl'];
+		$id = $row['feedid'];
 
-        	$countquery = "select count(*) from main where feedid='$feedid'";
+	        $session = curl_init();
+        	curl_setopt ( $session, CURLOPT_URL, $url );
+	        curl_setopt ( $session, CURLOPT_RETURNTRANSFER, TRUE );
+        	curl_setopt ( $session, CURLOPT_CONNECTTIMEOUT, 2 );
+		curl_setopt ( $session, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt ( $session, CURLOPT_USERAGENT, $useragent );
+		curl_setopt ( $session, CURLOPT_ENCODING, "gzip" );
+	        $result = curl_exec ( $session );
+        	curl_close( $session );
+        
+		$xml = simplexml_load_string($result, 'SimpleXMLElement', LIBXML_NOCDATA);
+
+		if ($result == FALSE) {
+			print "<hr />There was an issue fetching $url<hr />";
+			$count = 0;
+		} elseif ($xml->channel->item) {
+			$count = count($xml->channel->item);
+		} elseif ($xml->entry) {
+			$count = count($xml->entry);
+		} else {
+			$count = 0;
+		}
+	
+        	$countquery = "select count(*) from main where feedid='$id'";
 		$countresult = mysql_query($countquery);
 		$countrow = mysql_fetch_array($countresult);
 		$articlecount = $countrow['count(*)'];
-		if ($articlecount > $leavebehind) {	
-			$totalremove = $articlecount - $leavebehind;
-			$deletequery = "delete from main where date_sub(curdate(), interval $purgedays day) >= updateTime AND status='R' AND feedid='$feedid' ORDER BY updateTime ASC LIMIT $totalremove";
+
+		$totalremove = $articlecount - $count;
+
+		if ($totalremove > $count) {	
+			$deletequery = "delete from main where date_sub(curdate(), interval $purgedays day) >= updateTime AND status='R' AND feedid='$id' ORDER BY updateTime ASC LIMIT $totalremove";
 			$deleteresult = mysql_query($deletequery);
 		}
 	}

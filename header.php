@@ -11,7 +11,7 @@ header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-<title>sour reader</title>
+<title>newsreader</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link rel="stylesheet" type="text/css" href="yui/base-min.css" />
 <link rel="stylesheet" type="text/css" href="yui/reset-fonts-grids.css" />
